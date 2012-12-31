@@ -3,7 +3,7 @@
 from logging import getLogger
 from logging.config import fileConfig
 
-from mathutils import Vector
+from mathutils import Color, Vector
 import bpy
 
 from ysfs_lib.common import Color
@@ -65,7 +65,7 @@ class FaceReader:
             except:
                 self.logger.warning("Invalid color")
                 rgbCol = Color(255, 255, 255)
-        self.color = rgbCol
+        self.face.color = rgbCol
         
         
     def readNormal(self, data):
@@ -99,7 +99,7 @@ class FaceReader:
                 self.readColor(data)
                     
             elif data[0] == "B":
-                self.face.setBright()
+                self.face.bright = True
                     
             elif data[0][0] == "N":
                 self.readNormal(data)
@@ -126,7 +126,29 @@ class SRFReader:
         self.vertices = []
         self.faces = []
         self.roundedVertices = []
+        self.colors = []
         
+    def applyColors(self):
+        self.mesh.vertex_colors.new()
+        iface = 0
+        i = 0
+        while iface < len(self.faces):
+            #col = Color((self.colors[iface].r/255, self.colors[iface].g/255, self.colors[iface].b/255))
+            for j in range(len(self.faces[iface])):         
+                col = self.mesh.vertex_colors[0].data[i].color
+                col.r = self.colors[iface].r/255
+                col.g = self.colors[iface].g/255
+                col.b = self.colors[iface].b/255
+                i += 1
+            iface += 1
+                                                
+            
+    def apply_smooth(self):
+        for face in self.mesh.polygons:
+            for vert in face.vertices:
+                if self.roundedVertices[vert]:
+                    face.use_smooth = True
+                    break
         
     def readVertice(self, data):
         y, z, x = 0, 0, 0
@@ -150,6 +172,8 @@ class SRFReader:
         faceReader = FaceReader(self.fd)
         faceReader.readFace(self.vertices)
         self.faces.append(faceReader.face.vertices)
+        print(faceReader.face.color)
+        self.colors.append(faceReader.face.color)
         
         
     def readSRF(self):
@@ -171,16 +195,18 @@ class SRFReader:
                     self.readFace()
                     
                 elif data[0][0] == "E":
-                    # end
-                    self.mesh.from_pydata(self.vertices, [], self.faces)
-                    self.mesh.update()
-                    break 
+                    # end, sometimes missing in some file
+                    break
+        self.mesh.from_pydata(self.vertices, [], self.faces)
+        self.applyColors()
+        self.apply_smooth()
+        self.mesh.update()
                 
 global_undo = bpy.context.user_preferences.edit.use_global_undo
 bpy.context.user_preferences.edit.use_global_undo = False
 scene = bpy.context.scene
                 
-fd = open("test.srf", "r")                
+fd = open("f16.srf", "r")                
 srfReader = SRFReader(fd)
 srfReader.readSRF()
 

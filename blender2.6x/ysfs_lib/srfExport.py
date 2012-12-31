@@ -9,7 +9,7 @@ import bmesh
 import mathutils
 import bpy
 
-import ysfs_lib.config
+from  ysfs_lib import config
 from ysfs_lib.common import nl, Color
 
 
@@ -121,7 +121,7 @@ class MeshWriter:
             
             # -- Colors
             col = self.mesh.facesColor[faceIndex]
-            if lib.config.use24bitColor == True:
+            if config.use24bitColor == True:
                 col.calc24b()
                 self.buffer += 'C %d%s' % (col.col24, nl()) # Write the color of this face
             else:

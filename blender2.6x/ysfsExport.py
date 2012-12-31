@@ -3,7 +3,9 @@
 import mathutils
 import bpy
 
-from ysfs_lib.srfExport import Mesh, MeshWriter
+import ysfs_lib.srfExport
+import imp
+imp.reload(ysfs_lib.srfExport)
 
 # We take an inventory of all the meshes in meshDic 
 # to avoid writting them several times
@@ -16,8 +18,8 @@ def mesh2ysfs(ob):
     mesh = ob.data
     if mesh.name not in meshDic:
         meshDic[mesh.name] = True
-        m          = Mesh(mesh)
-        meshWriter = MeshWriter(m, fd)
+        m          = ysfs_lib.srfExport.Mesh(mesh)
+        meshWriter = ysfs_lib.srfExport.MeshWriter(m, fd)
         meshWriter.write()
         
         
