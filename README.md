@@ -1,4 +1,4 @@
-# ysfsblender
+# YSFS Blender
 YSFS Blender 2.4.x &amp; Blender 2.6.x addon for YSFlight simulator (aircraft, vehicle) - http://sourceforge.net/projects/ysfsblender
 
 Python scripts for Blender to import and export YSFlight files (.srf, .dnm, .fld, .yfs)
